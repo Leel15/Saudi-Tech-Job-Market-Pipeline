@@ -1,8 +1,9 @@
+pandas==2.2.1
+snowflake-connector-python==3.8.0
+python-dotenv==1.0.1
 beautifulsoup4==4.12.3
 requests==2.31.0
-pandas==2.2.1
-openpyxl==3.1.2
-python-dotenv==1.0.1
 rapidfuzz==3.6.1
-deep-translator==1.11.4
 pyarrow==15.0.0
+azure-storage-blob==12.19.0
+azure-identity==1.15.0
