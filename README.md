@@ -14,8 +14,8 @@ Job-Data-Pipeline/
 │   └── jsearch.py                     
 ├── Transformation/                     <-- Standardization, cleaning, and transformation pipelines
 ├── data/                               <-- Medallion architecture storage layers (Bronze, Silver, Gold)
-│   ├── MARTS/                        <-- Gold layer for analytics-ready datasets, aggregates & metrics
-│   ├── STAGING/                      <-- Silver layer for cleaned, deduplicated & standardized files
+│   ├── MARTS/                          <-- Gold layer for analytics-ready datasets, aggregates & metrics
+│   ├── STAGING/                        <-- Silver layer for cleaned, deduplicated & standardized files
 │   └── RAW/                            <-- Bronze layer for raw, untransformed scraper and API dumps
 ├── .env.example                        <-- Template file outlining required environment variables
 ├── .gitignore                         
@@ -29,22 +29,23 @@ Job-Data-Pipeline/
 
 As part of our initial project investigation phase, we evaluated multiple job platforms to establish a robust and comprehensive dataset for the Saudi technology market
 
+---
+
 ## Overview
 We identified and integrated 5 primary data sources covering the Saudi job market from different collection methods:
 
 # 📊 Data Sources - Initial Extraction Rate
 
-| Source | URL/Identifier | Collection Method | Format | Records Extracted |
-|:---:|:---:|:---:|:---:|:---:|
-| **Tanqeeb** | https://saudi.tanqeeb.com | Web Scraping | JSON | **106** 📦 |
-| **JSearch** | https://rapidapi.com/letscrape | API with Key | JSON | **301** 📦 |
-| **FreeHire** | https://freehire.me/jobs | Direct Endpoint | JSON | **230** 📦 |
-| **Tapneo** | https://tapneo-data.com | File-based source | CSV/JSON | **647** 📦 |
-| **Jooble** | https://sa.jooble.org | API with Key | JSON | **66** 📦 |
+| Source | URL/Identifier | Collection Method | Format |
+|:---:|:---:|:---:|:---:|
+| **Tanqeeb** | https://saudi.tanqeeb.com | Web Scraping | JSON |
+| **JSearch** | https://rapidapi.com/letscrape | API with Key | JSON | 
+| **FreeHire** | https://freehire.me/jobs | Direct Endpoint | JSON | 
+| **Tapneo** | https://tapneo-data.com | File-based source | CSV/JSON 
+| **Jooble** | https://sa.jooble.org | API with Key | JSON 
 
 ---
 
-**Total Records Collected**: 1,350📊
 
 ## Selection Reasoning
 
@@ -71,35 +72,7 @@ pip install -r requirements.txt
 
 ### **3. Configure Environment Variables**
 
-Create a file named `.env` in the root project directory (`Job-Data-Pipeline/`).
-
-Add your private API keys in the following format:
-
-```
-SCRAPEOPS_API_KEY=your_scrapeops_key_here
-RAPIDAPI_KEY=your_rapidapi_key_here
-```
-
----
-
-## 🛡️ Deduplication Strategy
-
-The scrapers are configured to automatically read existing records from the Raw Data JSON files (`_tech.json`) pushed exclusively to GitHub.
-
-When team members pull the latest updates and run a scraper, the system automatically detects previously saved links and skips them, completely preventing duplicate data without requiring local cache files to be committed.
-
----
-
-
-## ⚙️ Configuration
-
-
-### Git Ignore Rules
-
-The `.gitignore` file protects:
-- `.env` (local secrets)
-- Local cache and temporary files
-- System-specific files
+Create a file named `.env` in the root project directory (`Job-Data-Pipeline/`) , Add your private API keys 
 
 
 ---
