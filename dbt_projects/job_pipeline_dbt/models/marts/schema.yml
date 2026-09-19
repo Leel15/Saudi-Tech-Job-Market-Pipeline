@@ -1,0 +1,168 @@
+version: 2
+
+models:
+  - name: dim_company
+    description: "Company dimension: one row per distinct company name across all five sources, after TRIM + INITCAP standardization in staging."
+    columns:
+      - name: company_key
+        description: "Surrogate key generated from company_name."
+        tests: [unique, not_null]
+      - name: company_name
+        description: "Standardized company name."
+        tests: [not_null]
+
+  - name: dim_location
+    description: "Location dimension: one row per distinct (city, country) combination."
+    columns:
+      - name: location_key
+        description: "Surrogate key generated from (city, country)."
+        tests: [unique, not_null]
+      - name: city
+        description: "City name. May be NULL when only the country is known."
+      - name: country
+        description: "Country name."
+        tests: [not_null]
+      - name: location
+        description: "Human-readable combined location string."
+
+  - name: dim_date
+    description: "Standard calendar date dimension, generated via dbt_utils.date_spine, covering 2025-01-01 through 2027-12-31."
+    columns:
+      - name: date_key
+        description: "Surrogate key generated from date_day."
+        tests: [unique, not_null]
+      - name: date_day
+        description: "Calendar date."
+        tests: [unique, not_null]
+      - name: day_of_week
+        description: "Numeric day of week (0 = Sunday)."
+      - name: month
+        description: "Numeric month (1-12)."
+      - name: quarter
+        description: "Calendar quarter (1-4)."
+      - name: year
+        description: "Calendar year."
+      - name: is_weekend
+        description: "True if the date falls on Friday/Saturday equivalent per extract(dow); adjust if your fiscal week definition differs."
+
+  - name: dim_job_attributes
+    description: "Junk dimension combining four low-cardinality job attributes (employment_type, education, seniority_level, job_category) into a single dimension table, avoiding four separate single-column dimensions."
+    columns:
+      - name: job_attributes_key
+        description: "Surrogate key generated from the four combined attribute values."
+        tests: [unique, not_null]
+      - name: employment_type
+        description: "Employment type (e.g. Full-time, Part-time, Contract, Internship, Temporary)."
+        tests:
+          - accepted_values:
+              values: ['Full-time', 'Part-time', 'Contract', 'Internship', 'Temporary']
+              config:
+                severity: warn
+      - name: education
+        description: "Minimum education requirement, if stated by the source."
+      - name: seniority_level
+        description: "Inferred seniority level (Senior, Junior, Management, Mid/Unspecified)."
+      - name: job_category
+        description: "Inferred job category (Data, Security, DevOps/Infrastructure, Software Engineering, Design, Other/Unspecified)."
+
+  - name: dim_skill
+    description: "Skill dimension: one row per distinct skill extracted from job descriptions across all sources."
+    columns:
+      - name: skill_key
+        description: "Surrogate key generated from skill_name."
+        tests: [unique, not_null]
+      - name: skill_name
+        description: "Name of the skill (e.g. python, aws, docker)."
+        tests: [not_null]
+
+  - name: fct_job_postings
+    description: >
+      Job postings fact table. Grain: one row per unique job posting
+      (deduplicated across all five sources by company + city + title).
+      Measures: job_posting_count (always 1, enables COUNT aggregation)
+      and source_count (number of distinct sources that reported this posting).
+    columns:
+      - name: job_posting_key
+        description: "Surrogate key generated from (company, city, title). Uniquely identifies one job posting."
+        tests: [unique, not_null]
+      - name: company_key
+        description: "Foreign key to dim_company."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_company')
+              field: company_key
+      - name: location_key
+        description: "Foreign key to dim_location."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_key
+      - name: job_attributes_key
+        description: "Foreign key to dim_job_attributes."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_job_attributes')
+              field: job_attributes_key
+      - name: date_key
+        description: "Foreign key to dim_date."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: title
+        description: "Degenerate dimension: the job title, kept on the fact table since it identifies the posting itself."
+      - name: url
+        description: "Degenerate dimension: original job posting URL."
+      - name: source_count
+        description: "Measure: number of distinct sources that reported this exact job posting."
+        tests: [not_null]
+      - name: job_posting_count
+        description: "Measure: always 1. Enables COUNT-based aggregation of job postings."
+
+  - name: fct_job_skills
+    description: >
+      Bridge (factless) fact table resolving the many-to-many relationship
+      between job postings and skills. Grain: one row per (job posting, skill)
+      pair. Carries conformed dimension keys (company, location, job attributes)
+      matching fct_job_postings, so skill-demand analysis can be filtered/grouped
+      by company, location, or job attributes without joining the two fact tables.
+    columns:
+      - name: job_posting_key
+        description: "Foreign key to fct_job_postings."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('fct_job_postings')
+              field: job_posting_key
+      - name: skill_key
+        description: "Foreign key to dim_skill."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_skill')
+              field: skill_key
+      - name: company_key
+        description: "Conformed foreign key to dim_company (same key space as fct_job_postings)."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_company')
+              field: company_key
+      - name: location_key
+        description: "Conformed foreign key to dim_location (same key space as fct_job_postings)."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_location')
+              field: location_key
+      - name: job_attributes_key
+        description: "Conformed foreign key to dim_job_attributes (same key space as fct_job_postings)."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_job_attributes')
+              field: job_attributes_key

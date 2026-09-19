@@ -1,0 +1,40 @@
+version: 2
+
+models:
+  - name: int_all_jobs
+    description: "Unions all five staging models (jooble, jsearch, freehire, tanqeeb, tapneo) into a single dataset with a consistent schema. No deduplication or enrichment applied here."
+
+  - name: int_jobs_deduplicated
+    description: "Removes true duplicate postings across sources, grouping by (company, city, title). Aggregates seen_on_sources (which sources reported this job) and source_count. This is the grain-defining model: one row per unique job posting."
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - company
+            - city
+            - title
+    columns:
+      - name: company
+        description: "Standardized company name."
+        tests: [not_null]
+      - name: title
+        description: "Job title."
+        tests: [not_null]
+      - name: seen_on_sources
+        description: "Comma-separated list of distinct sources that reported this exact job posting."
+      - name: source_count
+        description: "Number of distinct sources that reported this job posting. Used as a measure downstream."
+
+  - name: int_jobs_enriched
+    description: "Adds derived attributes to the deduplicated job list: seniority_level (Senior/Junior/Management/Mid) and job_category (Data/Security/DevOps/Software Engineering/Design/Other), both inferred from the job title via keyword matching."
+    columns:
+      - name: seniority_level
+        description: "Inferred seniority level based on keywords in the job title."
+      - name: job_category
+        description: "Inferred job category based on keywords in the job title."
+
+  - name: int_job_skills
+    description: "Splits the comma-separated skills column from int_jobs_enriched into one row per (job, skill) pair, using SPLIT_TO_TABLE. Carries forward company/city/country/title plus job_category, seniority_level, employment_type, and education so the resulting fact table can share conformed dimension keys with fct_job_postings."
+    columns:
+      - name: skill
+        description: "A single skill extracted from the job's skills list."
+        tests: [not_null]
