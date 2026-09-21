@@ -47,20 +47,20 @@ We identified and integrated 5 primary data sources covering the Saudi job marke
 
 ## Selection Reasoning
 
-* **Tanqeeb**
-Selected to ensure broad, localized coverage of the Saudi labor market, as it is a prominent local platform offering diverse job listings.
+* **Tanqeeb**:
+    * Selected to ensure broad, localized coverage of the Saudi labor market, as it is a prominent local platform offering diverse job listings.
 
-* **JSearch API**
-Chosen as a reliable, managed source (REST API) providing structured, consistent data streams, thereby minimizing extraction errors and accelerating data ingestion.
+* **JSearch API**:
+    * Chosen as a reliable, managed source (REST API) providing structured, consistent data streams, thereby minimizing extraction errors and accelerating data ingestion.
 
-* **FreeHire**
-Integrated to specifically target and enrich the dataset with technical job listings.
+* **FreeHire**:
+   * Integrated to specifically target and enrich the dataset with technical job listings.
 
-* **TapNeo**
-Included as a historical baseline for testing and to verify the pipeline's capability to handle the import and integration of pre-existing files.
+* **TapNeo**:
+   * Included as a historical baseline for testing and to verify the pipeline's capability to handle the import and integration of pre-existing files.
 
-* **Jooble API**
-Selected for its regional and global scope, ensuring high accuracy and continuous updates for technical job listings across the Kingdom via its official endpoint.
+* **Jooble API**:
+   * Selected for its regional and global scope, ensuring high accuracy and continuous updates for technical job listings across the Kingdom via its official endpoint.
 
 We implemented a multi-source hybrid extraction strategy combining reliable, structured API providers (Jooble, JSearch, FreeHire) with targeted web scraping (Tanqeeb) and file-based ingestion (Tapneo). This ensures broad coverage of tech job postings across the Kingdom while avoiding platform limitations. Other potential sources with heavy login walls or strict rate limits were dropped after initial access testing.
 
