@@ -31,7 +31,7 @@ Job-Data-Pipeline/
 As part of our initial project investigation phase, we evaluated multiple job platforms to establish a robust and comprehensive dataset for the Saudi technology market
 
 
-## 📊 Data Sources - Initial Extraction Rate
+# 📊 Data Sources - Initial Extraction Rate
 
 We identified and integrated 5 primary data sources covering the Saudi job market from different collection methods:
 
@@ -43,7 +43,7 @@ We identified and integrated 5 primary data sources covering the Saudi job marke
 | **Tapneo** | https://tapneo-data.com | File-based source | CSV/JSON 
 | **Jooble** | https://sa.jooble.org | API with Key | JSON 
 
----
+
 
 ## Selection Reasoning
 
