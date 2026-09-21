@@ -28,10 +28,8 @@ Job-Data-Pipeline/
 
 ## 📋 Source Inventory & Selection Reasoning
 
-As part of our initial project investigation phase, we evaluated multiple job platforms to establish a robust and comprehensive dataset for the Saudi technology market
+As part of our initial project investigation phase, we evaluated multiple job platforms to establish a robust and comprehensive dataset for the Saudi technology market.
 
-
-# 📊 Data Sources - Initial Extraction Rate
 
 We identified and integrated 5 primary data sources covering the Saudi job market from different collection methods:
 
