@@ -15,8 +15,8 @@ select
     {{ dbt_utils.generate_surrogate_key([
         'employment_type', 'education', 'seniority_level', 'job_category'
     ]) }} as job_attributes_key,
-    employment_type,
-    education,
+    coalesce(employment_type, 'Not Specified') as employment_type,
+    coalesce(education, 'Not Specified')       as education,
     seniority_level,
     job_category
 from base

@@ -1,6 +1,3 @@
--- جدول جسر (bridge/factless fact): يحل علاقة many-to-many بين إعلان الوظيفة والمهارة
--- Grain: صف واحد لكل زوج (إعلان، مهارة)
--- مفاتيح الأبعاد المشتركة (conformed) مضافة لتحليل مباشر بدون Join بين جدولي Fact
 {{ config(materialized='table') }}
 
 with base as (
@@ -12,5 +9,6 @@ select
     {{ dbt_utils.generate_surrogate_key(['skill']) }}                    as skill_key,
     {{ dbt_utils.generate_surrogate_key(['company']) }}                  as company_key,
     {{ dbt_utils.generate_surrogate_key(['city', 'country']) }}          as location_key,
-    {{ dbt_utils.generate_surrogate_key(['employment_type','education','seniority_level','job_category']) }} as job_attributes_key
+    {{ dbt_utils.generate_surrogate_key(['employment_type','education','seniority_level','job_category']) }} as job_attributes_key,
+    {{ dbt_utils.generate_surrogate_key(['posted_date']) }}              as date_key
 from base

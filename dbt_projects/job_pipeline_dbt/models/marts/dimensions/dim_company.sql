@@ -3,7 +3,6 @@
 with base as (
     select distinct company
     from {{ ref('int_jobs_enriched') }}
-    where company is not null
 )
 
 select

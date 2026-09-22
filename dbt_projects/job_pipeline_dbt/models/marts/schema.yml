@@ -18,7 +18,7 @@ models:
         description: "Surrogate key generated from (city, country)."
         tests: [unique, not_null]
       - name: city
-        description: "City name. May be NULL when only the country is known."
+        description: "City name. Set to 'Not Specified' when the source did not report a city."
       - name: country
         description: "Country name."
         tests: [not_null]
@@ -32,8 +32,8 @@ models:
         description: "Surrogate key generated from date_day."
         tests: [unique, not_null]
       - name: date_day
-        description: "Calendar date."
-        tests: [unique, not_null]
+        description: "Calendar date. NULL for the single 'Unknown' row representing postings with a missing or invalid posted_date."
+        tests: [unique]
       - name: day_of_week
         description: "Numeric day of week (0 = Sunday)."
       - name: month
@@ -52,14 +52,14 @@ models:
         description: "Surrogate key generated from the four combined attribute values."
         tests: [unique, not_null]
       - name: employment_type
-        description: "Employment type (e.g. Full-time, Part-time, Contract, Internship, Temporary)."
+        description: "Employment type (e.g. Full-time, Part-time, Contract, Internship, Temporary). Set to 'Not Specified' when the source did not report one."
         tests:
           - accepted_values:
-              values: ['Full-time', 'Part-time', 'Contract', 'Internship', 'Temporary']
+              values: ['Full-time', 'Part-time', 'Contract', 'Internship', 'Temporary', 'Not Specified']
               config:
                 severity: warn
       - name: education
-        description: "Minimum education requirement, if stated by the source."
+        description: "Minimum education requirement. Set to 'Not Specified' when the source did not state one."
       - name: seniority_level
         description: "Inferred seniority level (Senior, Junior, Management, Mid/Unspecified)."
       - name: job_category
@@ -127,9 +127,10 @@ models:
     description: >
       Bridge (factless) fact table resolving the many-to-many relationship
       between job postings and skills. Grain: one row per (job posting, skill)
-      pair. Carries conformed dimension keys (company, location, job attributes)
-      matching fct_job_postings, so skill-demand analysis can be filtered/grouped
-      by company, location, or job attributes without joining the two fact tables.
+      pair. Carries conformed dimension keys (company, location, job attributes,
+      date) matching fct_job_postings, so skill-demand analysis can be
+      filtered/grouped by company, location, job attributes, or time without
+      joining the two fact tables.
     columns:
       - name: job_posting_key
         description: "Foreign key to fct_job_postings."
@@ -166,3 +167,10 @@ models:
           - relationships:
               to: ref('dim_job_attributes')
               field: job_attributes_key
+      - name: date_key
+        description: "Conformed foreign key to dim_date (same key space as fct_job_postings)."
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key

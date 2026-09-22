@@ -7,7 +7,7 @@ with source as (
 cleaned as (
     select
         trim(job_title)                     as title,
-        trim(initcap(company_name))         as company,
+        coalesce(trim(initcap(company_name)), 'Unknown Company') as company,
         city,
         country,
         case

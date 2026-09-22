@@ -5,6 +5,8 @@ with base as (
 enriched as (
     select
         *,
+        coalesce(city, 'Not Specified') as city_display,
+
         case
             when lower(title) like '%senior%' or lower(title) like '%lead%'
                  or lower(title) like '%principal%' or lower(title) like '%head of%'
