@@ -198,66 +198,21 @@ def get_jooble_jobs() -> pd.DataFrame:
     return df
 
 
-def load_existing_jobs(json_path: str) -> dict:
-    if not os.path.exists(json_path):
-        return {}
-    try:
-        with open(json_path, "r", encoding="utf-8") as f:
-            existing = json.load(f)
-        return {job["url"]: job for job in existing if job.get("url")}
-    except Exception:
-        return {}
-
-
-def merge_and_save_jobs(new_df: pd.DataFrame, json_path: str):
-    now = datetime.now(timezone.utc).isoformat()
-    existing_jobs = load_existing_jobs(json_path)
-    new_records = new_df.to_dict(orient="records")
-
-    added_count = 0
-    updated_count = 0
-    processed_records = []
-
-    for job in new_records:
-        url = job.get("url")
-        if not url:
-            continue
-
-        if url in existing_jobs:
-            job["first_seen"] = existing_jobs[url].get("first_seen", now)
-            job["last_seen"] = now
-            existing_jobs[url] = job
-            updated_count += 1
-            processed_records.append(job)
-        else:
-            job["first_seen"] = now
-            job["last_seen"] = now
-            existing_jobs[url] = job
-            added_count += 1
-            processed_records.append(job)
-
-    print(f"\n➕ وظائف جديدة أُضيفت: {added_count}")
-    print(f"🔄 وظائف موجودة تم تحديثها: {updated_count}")
-
-    final_list = list(existing_jobs.values())
-
-    os.makedirs(os.path.dirname(json_path), exist_ok=True)
-    with open(json_path, "w", encoding="utf-8") as f:
-        json.dump(final_list, f, ensure_ascii=False, indent=2)
-
-    print(f"💾 تم حفظ JSON محلياً في: {json_path}")
-    return processed_records
-
 
 if __name__ == "__main__":
-    df = get_jooble_jobs()
+    new_records = get_jooble_jobs()
     
-    if not df.empty:
+    if new_records:
         json_path = os.path.join(
             os.path.dirname(__file__), "..", "data", "RAW", "jooble_tech_jobs.json"
         )
-        processed_jobs = merge_and_save_jobs(df, json_path)
         
-        upload_to_adls_gen2(processed_jobs, source_name="jooble")
+        os.makedirs(os.path.dirname(json_path), exist_ok=True)
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(new_records, f, ensure_ascii=False, indent=2)
+
+        print(f"💾 تم حفظ الوظائف محلياً في: {json_path} (إجمالي: {len(new_records)} وظيفة)")
+        
+        upload_to_adls_gen2(new_records, source_name="jooble")
     else:
         print("⚠️ لم يتم جلب أي وظائف مطابقة.")

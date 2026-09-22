@@ -15,7 +15,7 @@ load_dotenv()
 SCRAPEOPS_API_KEY = os.getenv("SCRAPEOPS_API_KEY")
 BASE_URL = "https://saudi.tanqeeb.com"
 
-NUMBER_OF_JOBS = 20 
+NUMBER_OF_JOBS = 5 
 MAX_PAGES = 100  
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -24,8 +24,6 @@ RAW_DIR = os.path.join(PROJECT_ROOT, "data", "RAW")
 os.makedirs(RAW_DIR, exist_ok=True)
 
 JOBS_FILE = os.path.join(RAW_DIR, "tanqeeb_tech_jobs.json")
-LINKS_CACHE_FILE = os.path.join(RAW_DIR, "Extracted links", "tanqeeb_links_cache.json")
-os.makedirs(os.path.dirname(LINKS_CACHE_FILE), exist_ok=True)
 
 
 def get_scrapeops_url(url, render_js=False):
@@ -59,9 +57,8 @@ def get_page(url, render_js=False):
 
 
 def upload_to_adls_gen2(jobs_to_upload, source_name="tanqeeb"):
-    
     if not jobs_to_upload:
-        print("✨ لا توجد وظائف جديدة لرفعها إلى Azure في هذه الجلسة.")
+        print("✨ لا توجد بيانات لرفعها إلى Azure في هذه الجلسة.")
         return
 
     account_name = os.getenv("AZURE_STORAGE_ACCOUNT", "datajobpipline")
@@ -88,54 +85,11 @@ def upload_to_adls_gen2(jobs_to_upload, source_name="tanqeeb"):
         file_client = file_system_client.get_file_client(remote_file_path)
         file_client.upload_data(json_payload, overwrite=True)
 
-        print(f"🚀 تم رفع الوظائف الجديدة ({len(jobs_to_upload)} وظيفة) بنجاح إلى Azure في المسار:")
+        print(f"🚀 تم رفع البيانات الخام ({len(jobs_to_upload)} سجل) بنجاح إلى Azure في المسار:")
         print(f"   📂 {container_name}/{remote_file_path}")
 
     except Exception as e:
         print(f"❌ حدث خطأ أثناء الرفع إلى Azure ADLS Gen2: {e}")
-
-
-def load_extracted_links():
-    extracted_links = set()
-    
-    if os.path.exists(LINKS_CACHE_FILE):
-        try:
-            with open(LINKS_CACHE_FILE, "r", encoding="utf-8") as f:
-                extracted_links.update(json.load(f))
-        except Exception:
-            pass
-
-    if os.path.exists(JOBS_FILE):
-        try:
-            with open(JOBS_FILE, "r", encoding="utf-8") as f:
-                existing_jobs = json.load(f)
-                for job in existing_jobs:
-                    url = job.get("job_url") or job.get("source_url")
-                    if url:
-                        extracted_links.add(url)
-        except Exception:
-            pass
-
-    return extracted_links
-
-
-def save_extracted_links(links):
-    try:
-        os.makedirs(os.path.dirname(LINKS_CACHE_FILE), exist_ok=True)
-        with open(LINKS_CACHE_FILE, "w", encoding="utf-8") as f:
-            json.dump(list(links), f, ensure_ascii=False, indent=2)
-    except Exception as e:
-        print(f"   ❌ خطأ في حفظ الروابط: {e}")
-
-
-def load_existing_jobs():
-    if os.path.exists(JOBS_FILE):
-        try:
-            with open(JOBS_FILE, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as e:
-            print(f"⚠️ خطأ في قراءة الوظائف الموجودة: {e}")
-    return []
 
 
 def save_jobs(jobs):
@@ -143,22 +97,15 @@ def save_jobs(jobs):
         os.makedirs(RAW_DIR, exist_ok=True)
         with open(JOBS_FILE, "w", encoding="utf-8") as f:
             json.dump(jobs, f, ensure_ascii=False, indent=2)
-        print(f"\n   💾 تم حفظ {len(jobs)} وظيفة في:")
+        print(f"\n   💾 تم حفظ {len(jobs)} سجل في:")
         print(f"      {JOBS_FILE}")
         print(f"   ✅ الملف محفوظ بنجاح!")
     except Exception as e:
         print(f"   ❌ خطأ في حفظ الملف: {e}")
 
 
-def job_exists(jobs_list, job_url):
-    return any(job.get("job_url") == job_url for job in jobs_list)
-
-
 def get_job_links():
-    print("\n🔍 جاري تصفح قسم تقنية المعلومات واستخراج الوظائف...")
-
-    extracted_links = load_extracted_links()
-    print(f"📚 عدد الروابط المستخرجة سابقاً: {len(extracted_links)}")
+    print("\n🔍 جاري تصفح قسم تقنية المعلومات واستخراج الروابط...")
 
     job_links = set()
     page = 1
@@ -215,38 +162,46 @@ def get_job_links():
         print(f"📌 عدد روابط الوظائف المكتشفة في الصفحة {page}: {len(page_links)}")
 
         if page_links:
-            new_links_in_page = page_links - extracted_links - job_links
+            new_links_in_page = page_links - job_links
 
-            print(f"🆕 وظائف جديدة في هذه الصفحة: {len(new_links_in_page)}")
+            print(f"🆕 روابط جديدة في هذه الصفحة: {len(new_links_in_page)}")
             job_links.update(new_links_in_page)
-            extracted_links.update(page_links)
 
-            print(f"📊 إجمالي الوظائف الجديدة التي سيتم تحميلها: {len(job_links)}")
+            print(f"📊 إجمالي الروابط التي سيتم سحبها: {len(job_links)}")
         else:
-            print(f"⚠️ لم يتم العثور على روابط وظائف في الصفحة {page}")
+            print(f"⚠️ لم يتم العثور على روابط في الصفحة {page}")
 
         if len(job_links) >= NUMBER_OF_JOBS:
-            print(f"\n🎯 تم الوصول إلى العدد المطلوب ({NUMBER_OF_JOBS}) من الوظائف الجديدة.")
+            print(f"\n🎯 تم الوصول إلى العدد المطلوب ({NUMBER_OF_JOBS}) من الروابط.")
             break
 
         print(f"⏭️ الانتقال للصفحة التالية...")
         page += 1
         time.sleep(2)
 
-    print(f"\n🎯 إجمالي الروابط الجديدة المستخرجة: {len(job_links)}")
-    save_extracted_links(extracted_links)
-
-    return list(job_links), extracted_links
+    print(f"\n🎯 إجمالي الروابط المستخرجة: {len(job_links)}")
+    return list(job_links)
 
 
 def scrape_job(job_url):
     print("\n" + "-" * 70)
-    print(f"جاري استخراج: {job_url}")
+    print(f"جاري سحب (Raw): {job_url}")
 
     html = get_page(job_url, render_js=True)
     if not html:
-        print("❌ فشل تحميل الصفحة")
-        return None
+        print("❌ فشل تحميل الصفحة، سيتم حفظ سجل فارغ أو تخطيه بالكامل كـ فشل اتصال")
+        # في حالة الـ Raw الصارم، لو الصفحة ما حملت ممكن نرجع سجل يوضح الخطأ، أو نتخطاه إذا ما فيه HTML أصلاً
+        return {
+            "job_title": "Failed to Fetch",
+            "company_name": "Not Specified",
+            "location": "Not Specified",
+            "posted_date": "Not Specified",
+            "employment_type": "Not Specified",
+            "job_description": "",
+            "job_url": job_url,
+            "source": "tanqeeb",
+            "extracted_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        }
 
     soup = BeautifulSoup(html, "html.parser")
     json_ld = soup.find("script", type="application/ld+json")
@@ -271,10 +226,6 @@ def scrape_job(job_url):
         or (title_elem.get_text(strip=True) if title_elem else None)
         or "Not Specified"
     )
-
-    if job_title == "Not Specified" or len(job_title) < 3:
-        print("⚠️ تم تجاهل الصفحة: لم يتم استخراج عنوان صحيح")
-        return None
 
     comp_elem = soup.find("a", class_="job-meta-company")
     hiring_org = ld_data.get("hiringOrganization", {})
@@ -308,13 +259,10 @@ def scrape_job(job_url):
 
     full_description = re.sub(r"\n\s*\n", "\n", full_description).strip()
 
-    if not full_description:
-        print("⚠️ تم تجاهل الصفحة: الوصف فارغ")
-        return None
-
     employment_type = ld_data.get("employmentType", "Not Specified")
     current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # [Raw Pure]: تم إزالة الشروط التي تحذف الوظائف (مثل طول العنوان أو فراغ الوصف)
     job_record = {
         "job_title": job_title,
         "company_name": company_name,
@@ -327,19 +275,16 @@ def scrape_job(job_url):
         "extracted_at": current_timestamp
     }
 
-    print(f"✅ تم بنجاح: {job_title} | {company_name}")
+    print(f"📥 تم سحب السجل الخام: {job_title} | {company_name}")
     return job_record
 
 
 def main():
     print("=" * 70)
-    print("Tanqeeb Saudi - Tech Jobs Extractor")
+    print("Tanqeeb Saudi - Pure Raw Jobs Extractor (Bronze Layer)")
     print("=" * 70)
     
-    existing_jobs = load_existing_jobs()
-    print(f"\n📊 عدد الوظائف الموجودة بالفعل: {len(existing_jobs)}")
-
-    new_job_links, all_extracted_links = get_job_links()
+    new_job_links = get_job_links()
 
     if not new_job_links:
         print("❌ لم يتم العثور على روابط جديدة.")
@@ -348,45 +293,30 @@ def main():
     random.shuffle(new_job_links)
     selected_links = new_job_links[:NUMBER_OF_JOBS]
 
-    print(f"\n🎲 تم اختيار {len(selected_links)} وظيفة جديدة للتحميل...")
+    print(f"\n🎲 تم اختيار {len(selected_links)} روابط للسحب الخام...")
 
-    new_jobs = []
-    successfully_scraped = 0
+    raw_jobs = []
     
     for index, job_url in enumerate(selected_links, start=1):
         print(f"\n[{index}/{len(selected_links)}]")
         
-        if job_exists(existing_jobs, job_url):
-            print(f"⏭️ هذه الوظيفة موجودة بالفعل، تجاهل...")
-            continue
-        
         job = scrape_job(job_url)
         if job:
-            new_jobs.append(job)
-            successfully_scraped += 1
+            raw_jobs.append(job)
         time.sleep(1.5)
 
-    combined_jobs = existing_jobs + new_jobs
-    
-    unique_jobs = []
-    seen_urls = set()
-    for job in combined_jobs:
-        if job.get("job_url") not in seen_urls:
-            unique_jobs.append(job)
-            seen_urls.add(job.get("job_url"))
-    
-    all_extracted_links.update(new_job_links)
-    save_extracted_links(all_extracted_links)
-    
-    print(f"\n💾 جاري حفظ الوظائف محلياً...")
-    save_jobs(unique_jobs)
+    if not raw_jobs:
+        print("\n✨ لم يتم جمع أي بيانات.")
+        return
 
-    upload_to_adls_gen2(new_jobs, source_name="tanqeeb")
+    print(f"\n💾 جاري حفظ البيانات الخام محلياً...")
+    save_jobs(raw_jobs)
+
+    upload_to_adls_gen2(raw_jobs, source_name="tanqeeb")
 
     print("\n" + "=" * 70)
-    print(f"✅ تم الانتهاء بنجاح!")
-    print(f"   • وظائف مستخرجة جديدة: {successfully_scraped}")
-    print(f"   • إجمالي الوظائف المحفوظة محلياً: {len(unique_jobs)}")
+    print(f"✅ تم الانتهاء بنجاح (Bronze Layer)!")
+    print(f"   • إجمالي السجلات الخام المسحوبة: {len(raw_jobs)}")
     print(f"   • المسار المحلي: {JOBS_FILE}")
     print("=" * 70)
 
