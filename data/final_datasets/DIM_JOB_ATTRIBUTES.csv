@@ -1,0 +1,76 @@
+JOB_ATTRIBUTES_KEY,EMPLOYMENT_TYPE,EDUCATION,SENIORITY_LEVEL,JOB_CATEGORY
+c29b49aa853f995537042f2bd3233a4e,Full-time,Not Specified,Management,Software Engineering
+0365542d9b0428dce6dd3fa472392d17,Full-time,Not Specified,Mid/Unspecified,Software Engineering
+0eacea33ffb217a026117e87966304ec,Full-time,Not Specified,Senior,Software Engineering
+cb917c6b8f21aa05bd123b6b3ddb9d39,Full-time,Not Specified,Senior,Data
+c6f3cdee1f1d7bffbc93424feb6b5588,Full-time,Not Specified,Senior,Security
+1d9968dd574f441c49c84ddba554dd5a,Full-time,PhD,Mid/Unspecified,Software Engineering
+d6d03df600b07487a5eefd18e4c769a2,Contract,Not Specified,Senior,Software Engineering
+318e05aba5a0571d2d69255d7308b0eb,Full-time,Not Specified,Mid/Unspecified,Data
+33592aca294d19473e45d745e5716a19,Full-time,Not Specified,Mid/Unspecified,Other/Unspecified
+d6671ff37a9c08b76f2dd0fa70e46282,Full-time,Not Specified,Senior,Other/Unspecified
+4ae3da5ed67df20569811bda7edda3f4,Full-time,Not Specified,Mid/Unspecified,Design
+a74683d6d303bc41f6726bd8c6f681b5,Full-time,Not Specified,Mid/Unspecified,DevOps/Infrastructure
+2f8b65e3fcc3322d9beb55ef24f11bee,Full-time,PhD,Mid/Unspecified,Data
+ba14683fd133aedb627983c7a5b14b68,Full-time,Master,Mid/Unspecified,Data
+6292dd31ed918f0cf6f8bb0ab26d6181,Full-time,Not Specified,Mid/Unspecified,Security
+a38de38b42b1fccfd1ee4011ca6442d3,Contract,Not Specified,Mid/Unspecified,Data
+0a1fc1c68e97eda6a429ed76efff0f34,Part-time,Not Specified,Mid/Unspecified,Data
+9271781a32ce297cc26f9c3ae484921f,Full-time,Not Specified,Management,Security
+8f55ffa788f0fa4c7b39e1382e97ccbc,Full-time,Not Specified,Management,Other/Unspecified
+0fef93c3b93fe307b2b61b8dd7ef34e0,Full-time,Bachelor,Mid/Unspecified,Data
+4ac87bb113bcb1db57944374f9e6543c,Full-time,Not Specified,Senior,Design
+568b1c176a75e61ab92fc599fb7cf6a7,Contract,Master,Junior,Software Engineering
+4c85301ade7733a784893329b083a98f,Full-time,Not Specified,Junior,Software Engineering
+ea3f77490244fab8a097e8c159eca807,Full-time,Not Specified,Junior,Design
+926c7f46c8bc1c0c4d52943de3e83e37,Full-time,Not Specified,Junior,Other/Unspecified
+d542036c46abda9523a4b4a97467f5b6,Contract,Not Specified,Senior,DevOps/Infrastructure
+3850a1fca59648355a11c1b4602ae68c,Full-time,Bachelor,Management,Security
+21069c033967b1b2dff8053758441a61,Contract,Bachelor,Mid/Unspecified,Data
+d33592c263a2f4f982c5db4389969c4f,Contract,Bachelor,Management,Other/Unspecified
+c2f8c8066d85d9194e00d154391f2483,Contract,Bachelor,Mid/Unspecified,Other/Unspecified
+d41d64aea672e5e433912506128a1864,Full-time,Bachelor,Management,Data
+a2f799e1db48b2afb51278cbd8ba4fbc,Full-time,Master,Management,Other/Unspecified
+d9fbabdcde99c043950630e5f18b91bb,Full-time,High School / Diploma,Mid/Unspecified,Other/Unspecified
+fea7f34b128c62e570fb0b6441c0dc52,Full-time,Bachelor,Mid/Unspecified,Security
+a7ea998ee793926e13d4e619ad49ae39,Contract,High School / Diploma,Management,Other/Unspecified
+4f8c76cf47f8cc61dcc6ffe2d32c4080,Part-time,Not Specified,Mid/Unspecified,Other/Unspecified
+e86d3956d9c8df67f83ca031f8ae081c,Contract,Not Specified,Mid/Unspecified,Software Engineering
+e6d8a3338b05a44ae2269c9f530156b6,Full-time,Bachelor,Senior,DevOps/Infrastructure
+d0d36c42d78d923b3dafa605a4c9f4f3,Full-time,Master,Mid/Unspecified,Other/Unspecified
+4bc5bf1ab11783c31e022304f12500bd,Full-time,Bachelor,Mid/Unspecified,DevOps/Infrastructure
+52749aa73eddc8bdbe7da5de66839701,Contract,Not Specified,Management,Security
+7349f29455f1a7a61557d09f297b9c61,Contract,Master,Management,Other/Unspecified
+5ba6f12822db1d4d67ddc8bcb5c1e2a7,Contract,Bachelor,Senior,Other/Unspecified
+31e833930843cd0564e063ad6d8f31a5,Full-time,Not Specified,Senior,DevOps/Infrastructure
+63b8678eb2a0462a441f30d3a7d0ea58,Full-time,Not Specified,Junior,Data
+fca857a72dbfa89a848ef885da79ab2f,Full-time,Not Specified,Management,Design
+0fc5b4e9c9d3d7b80733e6e9280a7639,Full-time,Master,Mid/Unspecified,Software Engineering
+76f79901999aaeb205cd0e4050c1b9db,Full-time,Bachelor,Senior,Design
+07af1dcc301a66eceb60d8f38213fdfd,Full-time,Master,Senior,Data
+a2a7a118ec3036466fdf100b7d8fd573,Full-time,Bachelor,Senior,Data
+de8336aff99e191ff6f316f9f4611ff9,Part-time,Not Specified,Senior,Data
+b5a8cef62ef3a120974ef4e9d6775f81,Contract,Bachelor,Senior,DevOps/Infrastructure
+36342576b66b21f59333da16ca84323f,Contract,Not Specified,Management,Other/Unspecified
+fa5cfdad163303202288b317478c431f,Contract,Not Specified,Mid/Unspecified,DevOps/Infrastructure
+f15eb97161735b5df1b437fc7ff3ad20,Contract,Not Specified,Mid/Unspecified,Other/Unspecified
+87b1933db1b3bc75ac2bd7e51147e919,Full-time,Bachelor,Mid/Unspecified,Software Engineering
+dcaf0274d8cf95cc5f403120ee8d9eb8,Contract,Not Specified,Management,Design
+4bc88fd2b8bb9462fdadfdaabe442cc9,Contract,Not Specified,Senior,Other/Unspecified
+2f5f613f428077e0cf00a584c89878d8,Full-time,Bachelor,Management,Other/Unspecified
+0a92a0896b76bf0965db98f1fca34cb3,Full-time,Master,Senior,Software Engineering
+a87e5a5614e8a6d97259deae035f1a7e,Full-time,Bachelor,Senior,Software Engineering
+3424450df2bcfafeafeb4fb0f23fb7e9,Full-time,Master,Mid/Unspecified,DevOps/Infrastructure
+4f491303b59bebd69ca96423a77b7df2,Contract,Not Specified,Senior,Data
+c8dffd1c33919eea9404183529685fd7,Full-time,High School / Diploma,Mid/Unspecified,Software Engineering
+3643430fa0396fad0d0d4cec65ff80cb,Contract,Bachelor,Mid/Unspecified,Software Engineering
+d2fe5edfb5268065cab53c29c7b5d672,Contract,Bachelor,Senior,Data
+6dd46c444d5b991c5c8bf6ee6a9ee751,Full-time,Not Specified,Management,Data
+1639f08477db1dd7fc207756720b097d,Full-time,Not Specified,Management,DevOps/Infrastructure
+35ebd12571bc2e1ace57ae4560cd7bb7,Full-time,Bachelor,Senior,Other/Unspecified
+035ae54e0f7668242109b880679feb98,Full-time,Bachelor,Junior,Software Engineering
+9b6c93e1ec1fb48e7afaff0d7d32446c,Contract,Not Specified,Mid/Unspecified,Security
+d7838c27eb8edd2545575ee454783c2a,Full-time,Bachelor,Mid/Unspecified,Other/Unspecified
+842ff99cd5ef898a8ca8fcac18e3b65b,Full-time,Master,Management,Design
+ee66b1c3175e84781b73b93cfe9f2a4c,Full-time,High School / Diploma,Senior,Software Engineering
+2eb3ccd9412ac7a844ea7d72eb5d5fa1,Contract,PhD,Mid/Unspecified,Software Engineering
