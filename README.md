@@ -16,7 +16,7 @@ Job-Data-Pipeline/
 │   └── dbt_projects/
 │       └── job_pipeline_dbt/          <-- Core dbt project (models, staging, marts, and schema tests)
 ├── data/                              <-- Medallion architecture storage layers (Bronze, Silver, Gold)
-│   ├── MARTS/                         <-- Gold layer for analytics-ready datasets, aggregates & metrics
+│   ├── final_datasets/                         <-- Gold layer for analytics-ready datasets, aggregates & metrics
 │   ├── STAGING/                       <-- Silver layer for cleaned, deduplicated & standardized files
 │   └── RAW/                           <-- Bronze layer for raw, untransformed scraper and API dumps
 ├── .env.example                       <-- Template file outlining required environment variables
@@ -83,7 +83,7 @@ To visualize the modeled Saudi tech job market data, an interactive Power BI das
 
 👉 **[Explore Live Interactive Power BI Dashboard Here](https://app.powerbi.com/view?r=eyJrIjoiYmVkOThiMTMtMDUzYS00OTY0LTg3OGUtYmJkYmU4M2UzMDU4IiwidCI6ImMyYjA0ZGE2LTg0ODctNDFjYy04ODAzLTkwMzIxMDQ4YTc3MiIsImMiOjl9)**
 
-![Power BI Dashboard Preview](ref/dashboard_preview.png)
+![Power BI Dashboard Preview](assets/dashboard_preview.png)
 
 ---
 
