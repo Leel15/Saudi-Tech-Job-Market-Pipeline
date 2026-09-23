@@ -7,23 +7,65 @@ from urllib.parse import urlencode, urljoin
 from bs4 import BeautifulSoup
 import requests
 from dotenv import load_dotenv
-from datetime import datetime
-
-from azure.storage.filedatalake import DataLakeServiceClient
+import snowflake.connector
 
 load_dotenv()
 SCRAPEOPS_API_KEY = os.getenv("SCRAPEOPS_API_KEY")
 BASE_URL = "https://saudi.tanqeeb.com"
 
-NUMBER_OF_JOBS = 5 
-MAX_PAGES = 100  
+NUMBER_OF_JOBS = 20
+MAX_PAGES = 100
 
+# ============ المسارات حسب هيكلتك السابقة ============
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
-RAW_DIR = os.path.join(PROJECT_ROOT, "data", "RAW")
+RAW_DIR = os.path.join(PROJECT_ROOT, "data", "raw")
 os.makedirs(RAW_DIR, exist_ok=True)
 
 JOBS_FILE = os.path.join(RAW_DIR, "tanqeeb_tech_jobs.json")
+LINKS_CACHE_FILE = os.path.join(RAW_DIR, "Extracted links", "tanqeeb_links_cache.json")
+os.makedirs(os.path.dirname(LINKS_CACHE_FILE), exist_ok=True)
+
+import snowflake.connector
+
+
+def load_jobs_to_snowflake(jobs_list):
+    if not jobs_list:
+        return
+
+    conn = None
+    cursor = None
+    try:
+        conn = snowflake.connector.connect(
+            user=os.getenv("SNOWFLAKE_USER"),
+            password=os.getenv("SNOWFLAKE_PASSWORD"),
+            account=os.getenv("SNOWFLAKE_ACCOUNT"),
+            warehouse=os.getenv("SNOWFLAKE_WAREHOUSE"),
+            database=os.getenv("SNOWFLAKE_DATABASE"),
+            schema=os.getenv("SNOWFLAKE_SCHEMA")
+        )
+        cursor = conn.cursor()
+
+        print(f"☁️ جاري إرسال {len(jobs_list)} وظيفة إلى جدول RAW_TANQEEB_JOBS في Snowflake...")
+
+        insert_query = "INSERT INTO RAW_TANQEEB_JOBS (RAW_PAYLOAD) SELECT PARSE_JSON(%s)"
+
+        for job in jobs_list:
+            json_str = json.dumps(job, ensure_ascii=False)
+            cursor.execute(insert_query, (json_str,))
+
+        conn.commit()
+        print("✅ تم رفع البيانات إلى Snowflake بنجاح!")
+
+    except Exception as e:
+        print(f"❌ خطأ أثناء الرفع لـ Snowflake: {e}")
+        if conn:
+            conn.rollback()
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
 def get_scrapeops_url(url, render_js=False):
@@ -33,7 +75,7 @@ def get_scrapeops_url(url, render_js=False):
     }
     if render_js:
         payload["render_js"] = "true"
-        
+
     return "https://proxy.scrapeops.io/v1/?" + urlencode(payload)
 
 
@@ -56,40 +98,47 @@ def get_page(url, render_js=False):
         return None
 
 
-def upload_to_adls_gen2(jobs_to_upload, source_name="tanqeeb"):
-    if not jobs_to_upload:
-        print("✨ لا توجد بيانات لرفعها إلى Azure في هذه الجلسة.")
-        return
+def load_extracted_links():
+    extracted_links = set()
 
-    account_name = os.getenv("AZURE_STORAGE_ACCOUNT", "datajobpipline")
-    container_name = os.getenv("AZURE_STORAGE_CONTAINER", "data")
-    sas_token = os.getenv("AZURE_SAS_TOKEN")
+    if os.path.exists(LINKS_CACHE_FILE):
+        try:
+            with open(LINKS_CACHE_FILE, "r", encoding="utf-8") as f:
+                extracted_links.update(json.load(f))
+        except Exception:
+            pass
 
-    if not sas_token:
-        print("⚠️ لم يتم العثور على AZURE_SAS_TOKEN في ملف .env، تعذر الرفع لـ Azure.")
-        return
+    if os.path.exists(JOBS_FILE):
+        try:
+            with open(JOBS_FILE, "r", encoding="utf-8") as f:
+                existing_jobs = json.load(f)
+                for job in existing_jobs:
+                    url = job.get("job_url") or job.get("source_url")
+                    if url:
+                        extracted_links.add(url)
+        except Exception:
+            pass
 
+    return extracted_links
+
+
+def save_extracted_links(links):
     try:
-        account_url = f"https://{account_name}.dfs.core.windows.net"
-        if not sas_token.startswith("?"):
-            sas_token = f"?{sas_token}"
-            
-        service_client = DataLakeServiceClient(account_url=f"{account_url}{sas_token}")
-        file_system_client = service_client.get_file_system_client(container_name)
-
-        ingest_date = datetime.now().strftime("%Y-%m-%d")
-        remote_file_path = f"raw/{source_name}/ingest_date={ingest_date}/data.json"
-
-        json_payload = json.dumps(jobs_to_upload, ensure_ascii=False, indent=2)
-
-        file_client = file_system_client.get_file_client(remote_file_path)
-        file_client.upload_data(json_payload, overwrite=True)
-
-        print(f"🚀 تم رفع البيانات الخام ({len(jobs_to_upload)} سجل) بنجاح إلى Azure في المسار:")
-        print(f"   📂 {container_name}/{remote_file_path}")
-
+        os.makedirs(os.path.dirname(LINKS_CACHE_FILE), exist_ok=True)
+        with open(LINKS_CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(list(links), f, ensure_ascii=False, indent=2)
     except Exception as e:
-        print(f"❌ حدث خطأ أثناء الرفع إلى Azure ADLS Gen2: {e}")
+        print(f"   ❌ خطأ في حفظ الروابط: {e}")
+
+
+def load_existing_jobs():
+    if os.path.exists(JOBS_FILE):
+        try:
+            with open(JOBS_FILE, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"⚠️ خطأ في قراءة الوظائف الموجودة: {e}")
+    return []
 
 
 def save_jobs(jobs):
@@ -97,24 +146,43 @@ def save_jobs(jobs):
         os.makedirs(RAW_DIR, exist_ok=True)
         with open(JOBS_FILE, "w", encoding="utf-8") as f:
             json.dump(jobs, f, ensure_ascii=False, indent=2)
-        print(f"\n   💾 تم حفظ {len(jobs)} سجل في:")
+        print(f"\n   💾 تم حفظ {len(jobs)} وظيفة في:")
         print(f"      {JOBS_FILE}")
         print(f"   ✅ الملف محفوظ بنجاح!")
     except Exception as e:
         print(f"   ❌ خطأ في حفظ الملف: {e}")
 
 
+def job_exists(jobs_list, job_url):
+    return any(job.get("job_url") == job_url for job in jobs_list)
+
+
 def get_job_links():
-    print("\n🔍 جاري تصفح قسم تقنية المعلومات واستخراج الروابط...")
+    print("\n🔍 جاري تصفح قسم تقنية المعلومات واستخراج الوظائف...")
+
+    extracted_links = load_extracted_links()
+    print(f"📚 عدد الروابط المستخرجة سابقاً: {len(extracted_links)}")
 
     job_links = set()
     page = 1
 
+    search_params = {
+        "keywords": "",
+        "country": "54",
+        "state": "0",
+        "category": "1002",
+        "workplace": "0",
+        "search_period": "0",
+        "lang": "all"
+    }
+
     while page <= MAX_PAGES:
+        query_string = urlencode(search_params)
+
         if page == 1:
-            page_url = f"{BASE_URL}/s/jobs/IT-jobs"
+            page_url = f"{BASE_URL}/ar/jobs/search?{query_string}"
         else:
-            page_url = f"{BASE_URL}/s/jobs/IT-jobs/page/{page}"
+            page_url = f"{BASE_URL}/ar/jobs/search/page/{page}?{query_string}"
 
         print(f"\n📄 جاري البحث في الصفحة {page}:")
         print(page_url)
@@ -162,46 +230,38 @@ def get_job_links():
         print(f"📌 عدد روابط الوظائف المكتشفة في الصفحة {page}: {len(page_links)}")
 
         if page_links:
-            new_links_in_page = page_links - job_links
+            new_links_in_page = page_links - extracted_links - job_links
 
-            print(f"🆕 روابط جديدة في هذه الصفحة: {len(new_links_in_page)}")
+            print(f"🆕 وظائف جديدة في هذه الصفحة: {len(new_links_in_page)}")
             job_links.update(new_links_in_page)
+            extracted_links.update(page_links)
 
-            print(f"📊 إجمالي الروابط التي سيتم سحبها: {len(job_links)}")
+            print(f"📊 إجمالي الوظائف الجديدة التي سيتم تحميلها: {len(job_links)}")
         else:
-            print(f"⚠️ لم يتم العثور على روابط في الصفحة {page}")
+            print(f"⚠️ لم يتم العثور على روابط وظائف في الصفحة {page}")
 
         if len(job_links) >= NUMBER_OF_JOBS:
-            print(f"\n🎯 تم الوصول إلى العدد المطلوب ({NUMBER_OF_JOBS}) من الروابط.")
+            print(f"\n🎯 تم الوصول إلى العدد المطلوب ({NUMBER_OF_JOBS}) من الوظائف الجديدة.")
             break
 
         print(f"⏭️ الانتقال للصفحة التالية...")
         page += 1
         time.sleep(2)
 
-    print(f"\n🎯 إجمالي الروابط المستخرجة: {len(job_links)}")
-    return list(job_links)
+    print(f"\n🎯 إجمالي الروابط الجديدة المستخرجة: {len(job_links)}")
+    save_extracted_links(extracted_links)
+
+    return list(job_links), extracted_links
 
 
 def scrape_job(job_url):
     print("\n" + "-" * 70)
-    print(f"جاري سحب (Raw): {job_url}")
+    print(f"جاري استخراج: {job_url}")
 
     html = get_page(job_url, render_js=True)
     if not html:
-        print("❌ فشل تحميل الصفحة، سيتم حفظ سجل فارغ أو تخطيه بالكامل كـ فشل اتصال")
-        # في حالة الـ Raw الصارم، لو الصفحة ما حملت ممكن نرجع سجل يوضح الخطأ، أو نتخطاه إذا ما فيه HTML أصلاً
-        return {
-            "job_title": "Failed to Fetch",
-            "company_name": "Not Specified",
-            "location": "Not Specified",
-            "posted_date": "Not Specified",
-            "employment_type": "Not Specified",
-            "job_description": "",
-            "job_url": job_url,
-            "source": "tanqeeb",
-            "extracted_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        }
+        print("❌ فشل تحميل الصفحة")
+        return None
 
     soup = BeautifulSoup(html, "html.parser")
     json_ld = soup.find("script", type="application/ld+json")
@@ -222,19 +282,23 @@ def scrape_job(job_url):
 
     title_elem = soup.find("h3", class_="job-title-text") or soup.find("h1")
     job_title = (
-        ld_data.get("title")
-        or (title_elem.get_text(strip=True) if title_elem else None)
-        or "Not Specified"
+            ld_data.get("title")
+            or (title_elem.get_text(strip=True) if title_elem else None)
+            or "Not Specified"
     )
+
+    if job_title == "Not Specified" or len(job_title) < 3:
+        print("⚠️ تم تجاهل الصفحة: لم يتم استخراج عنوان صحيح")
+        return None
 
     comp_elem = soup.find("a", class_="job-meta-company")
     hiring_org = ld_data.get("hiringOrganization", {})
     ld_company = hiring_org.get("name") if isinstance(hiring_org, dict) else None
 
     company_name = (
-        ld_company
-        or (comp_elem.get_text(strip=True) if comp_elem else None)
-        or "Not Specified"
+            ld_company
+            or (comp_elem.get_text(strip=True) if comp_elem else None)
+            or "Not Specified"
     )
 
     location = "Saudi Arabia"
@@ -255,14 +319,17 @@ def scrape_job(job_url):
         full_description = desc_body.get_text(separator="\n", strip=True)
     else:
         raw_desc = ld_data.get("description", "")
-        full_description = BeautifulSoup(raw_desc, "html.parser").get_text(separator="\n", strip=True) if raw_desc else ""
+        full_description = BeautifulSoup(raw_desc, "html.parser").get_text(separator="\n",
+                                                                           strip=True) if raw_desc else ""
 
     full_description = re.sub(r"\n\s*\n", "\n", full_description).strip()
 
-    employment_type = ld_data.get("employmentType", "Not Specified")
-    current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    if not full_description:
+        print("⚠️ تم تجاهل الصفحة: الوصف فارغ")
+        return None
 
-    # [Raw Pure]: تم إزالة الشروط التي تحذف الوظائف (مثل طول العنوان أو فراغ الوصف)
+    employment_type = ld_data.get("employmentType", "Not Specified")
+
     job_record = {
         "job_title": job_title,
         "company_name": company_name,
@@ -271,20 +338,22 @@ def scrape_job(job_url):
         "employment_type": employment_type,
         "job_description": full_description,
         "job_url": job_url,
-        "source": "tanqeeb",
-        "extracted_at": current_timestamp
+        "source": "tanqeeb"
     }
 
-    print(f"📥 تم سحب السجل الخام: {job_title} | {company_name}")
+    print(f"✅ تم بنجاح: {job_title} | {company_name}")
     return job_record
 
 
 def main():
     print("=" * 70)
-    print("Tanqeeb Saudi - Pure Raw Jobs Extractor (Bronze Layer)")
+    print("Tanqeeb Saudi - Tech Jobs Extractor")
     print("=" * 70)
-    
-    new_job_links = get_job_links()
+
+    existing_jobs = load_existing_jobs()
+    print(f"\n📊 عدد الوظائف الموجودة بالفعل: {len(existing_jobs)}")
+
+    new_job_links, all_extracted_links = get_job_links()
 
     if not new_job_links:
         print("❌ لم يتم العثور على روابط جديدة.")
@@ -293,31 +362,47 @@ def main():
     random.shuffle(new_job_links)
     selected_links = new_job_links[:NUMBER_OF_JOBS]
 
-    print(f"\n🎲 تم اختيار {len(selected_links)} روابط للسحب الخام...")
+    print(f"\n🎲 تم اختيار {len(selected_links)} وظيفة جديدة للتحميل...")
 
-    raw_jobs = []
-    
+    new_jobs = []
+    successfully_scraped = 0
+
     for index, job_url in enumerate(selected_links, start=1):
         print(f"\n[{index}/{len(selected_links)}]")
-        
+
+        if job_exists(existing_jobs, job_url):
+            print(f"⏭️ هذه الوظيفة موجودة بالفعل، تجاهل...")
+            continue
+
         job = scrape_job(job_url)
         if job:
-            raw_jobs.append(job)
+            new_jobs.append(job)
+            successfully_scraped += 1
         time.sleep(1.5)
 
-    if not raw_jobs:
-        print("\n✨ لم يتم جمع أي بيانات.")
-        return
+    combined_jobs = existing_jobs + new_jobs
 
-    print(f"\n💾 جاري حفظ البيانات الخام محلياً...")
-    save_jobs(raw_jobs)
+    unique_jobs = []
+    seen_urls = set()
+    for job in combined_jobs:
+        if job.get("job_url") not in seen_urls:
+            unique_jobs.append(job)
+            seen_urls.add(job.get("job_url"))
 
-    upload_to_adls_gen2(raw_jobs, source_name="tanqeeb")
+    all_extracted_links.update(new_job_links)
+    save_extracted_links(all_extracted_links)
+
+    print(f"\n💾 جاري حفظ الوظائف...")
+    save_jobs(unique_jobs)
+
+    if new_jobs:
+        load_jobs_to_snowflake(new_jobs)
 
     print("\n" + "=" * 70)
-    print(f"✅ تم الانتهاء بنجاح (Bronze Layer)!")
-    print(f"   • إجمالي السجلات الخام المسحوبة: {len(raw_jobs)}")
-    print(f"   • المسار المحلي: {JOBS_FILE}")
+    print(f"✅ تم الانتهاء بنجاح!")
+    print(f"   • وظائف مستخرجة جديدة: {successfully_scraped}")
+    print(f"   • إجمالي الوظائف المحفوظة: {len(unique_jobs)}")
+    print(f"   • المسار: {JOBS_FILE}")
     print("=" * 70)
 
 

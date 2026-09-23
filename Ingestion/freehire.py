@@ -1,6 +1,6 @@
 import json
 import os
-import time 
+import time
 import requests
 import pandas as pd
 from requests.adapters import HTTPAdapter
@@ -23,7 +23,7 @@ HEADERS = {
     "Referer": "https://freehire.me/?countries=sa",
 }
 
-TARGET_COUNT = 5
+TARGET_COUNT = 150
 
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
@@ -31,7 +31,19 @@ RAW_DIR = os.path.join(PROJECT_ROOT, "data", "RAW")
 JSON_PATH = os.path.join(RAW_DIR, "freehire_tech_jobs.json")
 
 
+def load_existing_jobs():
+    """قراءة الوظائف الموجودة محلياً مسبقاً لتجنب التكرار."""
+    if os.path.exists(JSON_PATH):
+        try:
+            with open(JSON_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return []
+
+
 def create_resilient_session() -> requests.Session:
+    """ينشئ session واحدة مع إعادة محاولة تلقائية عند أخطاء السيرفر المؤقتة."""
     session = requests.Session()
 
     retry_strategy = Retry(
@@ -65,7 +77,7 @@ def upload_to_adls_gen2(jobs_to_upload, source_name="freehire"):
         account_url = f"https://{account_name}.dfs.core.windows.net"
         if not sas_token.startswith("?"):
             sas_token = f"?{sas_token}"
-            
+
         service_client = DataLakeServiceClient(account_url=f"{account_url}{sas_token}")
         file_system_client = service_client.get_file_system_client(container_name)
 
@@ -85,11 +97,13 @@ def upload_to_adls_gen2(jobs_to_upload, source_name="freehire"):
     except Exception as e:
         print(f"❌ حدث خطأ أثناء الرفع إلى Azure ADLS Gen2: {e}")
 
-    
+
 def get_tech_jobs_50(target_count=TARGET_COUNT):
     session = create_resilient_session()
 
-   
+    existing_jobs = load_existing_jobs()
+    existing_urls = {job.get("source_url") for job in existing_jobs if job.get("source_url")}
+    print(f"📊 عدد الوظائف الموجودة محلياً مسبقاً: {len(existing_jobs)}")
 
     new_fetched_jobs = []
     limit = 20
@@ -122,6 +136,8 @@ def get_tech_jobs_50(target_count=TARGET_COUNT):
             for item in raw_jobs:
                 job_url = item.get("url", "")
 
+                if job_url in existing_urls:
+                    continue
 
                 current_timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -139,6 +155,7 @@ def get_tech_jobs_50(target_count=TARGET_COUNT):
                     "extracted_at": current_timestamp
                 }
                 new_fetched_jobs.append(record)
+                existing_urls.add(job_url)
 
                 if len(new_fetched_jobs) >= target_count:
                     break
@@ -158,14 +175,17 @@ def get_tech_jobs_50(target_count=TARGET_COUNT):
             break
 
     if not new_fetched_jobs:
-        print("✨ لم يتم جلب أي وظائف.")
+        print("✨ لا توجد وظائف جديدة، لم يتم رفع أي ملف جديد اليوم.")
         return
 
+    combined_jobs = existing_jobs + new_fetched_jobs
+
+    # 1. الحفظ المحلي (يحفظ الأرشيف كاملاً للرجوع له محلياً)
     os.makedirs(RAW_DIR, exist_ok=True)
     with open(JSON_PATH, "w", encoding="utf-8") as f:
-        json.dump(new_fetched_jobs, f, ensure_ascii=False, indent=2)
+        json.dump(combined_jobs, f, ensure_ascii=False, indent=2)
 
-    print(f"\n🎯 اكتملت العملية بنجاح! إجمالي الوظائف المحفوظة محلياً: {len(new_fetched_jobs)}")
+    print(f"\n🎯 اكتملت العملية بنجاح! إجمالي الوظائف المحفوظة محلياً: {len(combined_jobs)}")
 
     upload_to_adls_gen2(new_fetched_jobs)
 
