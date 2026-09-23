@@ -76,6 +76,22 @@ The Gold layer (`MARTS`) follows a classic Dimensional Modeling (Star Schema) st
 * **Dimension Tables** (`dim_*`): Company, Location, Date , Skill , and Job Attributes dimensions providing descriptive context.
 
 ---
+
+## 📊 Dashboard & Analytics Preview
+
+To visualize the modeled Saudi tech job market data, an interactive Power BI dashboard was built connecting directly to our final Star Schema marts. 
+
+👉 **[Explore Live Interactive Power BI Dashboard Here](https://app.powerbi.com/view?r=eyJrIjoiYmVkOThiMTMtMDUzYS00OTY0LTg3OGUtYmJkYmU4M2UzMDU4IiwidCI6ImMyYjA0ZGE2LTg0ODctNDFjYy04ODAzLTkwMzIxMDQ4YTc3MiIsImMiOjl9)**
+
+![Power BI Dashboard Preview](ref/dashboard_preview.png)
+
+---
+
+## 📦 Final Datasets & Handover
+
+As per our pipeline handover protocol, structured CSV exports of the final Mart tables are preserved under the [final_datasets/](data/final_datasets/) directory, accompanied by full schema documentation to ensure longevity beyond temporary cloud trials
+
+---
 ## 🚀 Getting Started
 
 ### **1. Clone the Repository**
