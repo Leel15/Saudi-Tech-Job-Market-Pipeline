@@ -2,7 +2,7 @@
 -- (لا يوجد first_seen/last_seen/repost_count بجداول Snowflake الفعلية)
 
 with base as (
-    select * from {{ ref('int_all_jobs') }}
+    select * from JOB_MARKET_DB.intermediate.int_all_jobs
 ),
 
 grouped as (

@@ -1,8 +1,15 @@
---  معيار التكرار: company + city + country + location + title
+
+  create or replace   view JOB_MARKET_DB.intermediate.int_jobs_deduplicated
+  
+  
+  
+  
+  as (
+    --  معيار التكرار: company + city + country + location + title
 -- (لا يوجد first_seen/last_seen/repost_count بجداول Snowflake الفعلية)
 
 with base as (
-    select * from {{ ref('int_all_jobs') }}
+    select * from JOB_MARKET_DB.intermediate.int_all_jobs
 ),
 
 grouped as (
@@ -25,3 +32,5 @@ grouped as (
 )
 
 select * from grouped
+  );
+

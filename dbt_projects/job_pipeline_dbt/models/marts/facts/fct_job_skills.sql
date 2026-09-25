@@ -1,3 +1,5 @@
+-- Bridge (factless) fact table. Grain: صف واحد لكل زوج (إعلان وظيفي، مهارة)
+-- job_posting_key مطابق تمامًا لنفس تركيبة fct_job_postings لضمان صحة العلاقة بينهما
 {{ config(materialized='table') }}
 
 with base as (
@@ -5,7 +7,7 @@ with base as (
 )
 
 select
-    {{ dbt_utils.generate_surrogate_key(['company', 'city', 'title']) }} as job_posting_key,
+    {{ dbt_utils.generate_surrogate_key(['company', 'city', 'country', 'location', 'title']) }} as job_posting_key,
     {{ dbt_utils.generate_surrogate_key(['skill']) }}                    as skill_key,
     {{ dbt_utils.generate_surrogate_key(['company']) }}                  as company_key,
     {{ dbt_utils.generate_surrogate_key(['city', 'country']) }}          as location_key,

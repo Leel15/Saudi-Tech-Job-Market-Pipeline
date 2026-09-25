@@ -1,4 +1,11 @@
-with base as (
+
+  create or replace   view JOB_MARKET_DB.intermediate.int_job_skills
+  
+  
+  
+  
+  as (
+    with base as (
     select
         company,
         city,
@@ -11,7 +18,7 @@ with base as (
         education,
         posted_date,
         skills
-    from {{ ref('int_jobs_enriched') }}
+    from JOB_MARKET_DB.intermediate.int_jobs_enriched
     where skills is not null
 ),
 
@@ -46,9 +53,11 @@ normalized as (
         split.posted_date,
         coalesce(syn.canonical_skill, split.raw_skill) as skill
     from split
-    left join {{ ref('skill_synonyms') }} as syn
+    left join JOB_MARKET_DB.PUBLIC.skill_synonyms as syn
         on lower(trim(split.raw_skill)) = lower(trim(syn.raw_skill))
 )
 
 select * from normalized
 where skill != ''
+  );
+

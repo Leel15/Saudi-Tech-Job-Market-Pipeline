@@ -1,0 +1,12 @@
+
+    
+    
+    ;
+    -- dbt seed --
+    
+            insert overwrite into JOB_MARKET_DB.PUBLIC.skill_synonyms (raw_skill, canonical_skill) values
+            (%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s),(%s,%s)
+        
+
+;
+  

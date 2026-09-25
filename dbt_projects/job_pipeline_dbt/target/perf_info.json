@@ -1,0 +1,56 @@
+{
+    "path_count": 229,
+    "parsed_path_count": 9,
+    "static_analysis_path_count": 6,
+    "static_analysis_parsed_path_count": 2,
+    "is_partial_parse_enabled": true,
+    "is_static_analysis_enabled": true,
+    "read_files_elapsed": 0.15972540015354753,
+    "load_macros_elapsed": 0.0008204998448491096,
+    "parse_project_elapsed": 1.1711002998054028,
+    "patch_sources_elapsed": 2.5399960577487946e-05,
+    "process_manifest_elapsed": 0.007624700199812651,
+    "load_all_elapsed": 1.6033522002398968,
+    "projects": [
+        {
+            "project_name": "job_pipeline_dbt",
+            "elapsed": 1.1709248004481196,
+            "parsers": [
+                {
+                    "parser": "model",
+                    "elapsed": 0.3629920003004372,
+                    "parsed_path_count": 6
+                },
+                {
+                    "parser": "seed",
+                    "elapsed": 0.22682800004258752,
+                    "parsed_path_count": 1
+                },
+                {
+                    "parser": "test",
+                    "elapsed": 0.5810789996758103,
+                    "parsed_path_count": 2
+                }
+            ],
+            "parsed_path_count": 9
+        },
+        {
+            "project_name": "dbt_snowflake",
+            "elapsed": 0,
+            "parsers": [],
+            "parsed_path_count": 0
+        },
+        {
+            "project_name": "dbt",
+            "elapsed": 0,
+            "parsers": [],
+            "parsed_path_count": 0
+        },
+        {
+            "project_name": "dbt_utils",
+            "elapsed": 0,
+            "parsers": [],
+            "parsed_path_count": 0
+        }
+    ]
+}
