@@ -77,6 +77,30 @@ The Gold layer (`MARTS`) follows a classic Dimensional Modeling (Star Schema) st
 
 ---
 
+## 🗺️ dbt Documentation & Lineage Graph
+
+To ensure full transparency, modularity, and data lineage tracking across our transformation layers, dbt automatically generates an interactive documentation site and visual dependency graph.
+
+### **Pipeline Lineage Graph**
+The graph below illustrates the end-to-end transformation flow—from raw staging sources through intermediate deduplication/enrichment models, all the way to final dimensional marts and facts:
+
+![dbt Lineage Graph](dbt_projects/job_pipeline_dbt/docs/Architecture - Lineage Graph [dbt Lineage Graph].jpeg)
+
+### **Generating Documentation Locally**
+You can explore the full interactive documentation and lineage graph locally by running:
+
+```bash
+# Navigate to the dbt project directory
+cd dbt_projects/job_pipeline_dbt
+
+# Generate the documentation files
+dbt docs generate
+
+# Launch the local web server to view the docs UI
+dbt docs serve
+```
+---
+
 ## 📊 Dashboard & Analytics Preview
 
 To visualize the modeled Saudi tech job market data, an interactive Power BI dashboard was built connecting directly to our final Star Schema marts. 
