@@ -84,7 +84,7 @@ To ensure full transparency, modularity, and data lineage tracking across our tr
 ### **Pipeline Lineage Graph**
 The graph below illustrates the end-to-end transformation flow—from raw staging sources through intermediate deduplication/enrichment models, all the way to final dimensional marts and facts:
 
-![dbt Lineage Graph](dbt_projects/job_pipeline_dbt/docs/Architecture - Lineage Graph [dbt Lineage Graph].jpeg)
+![dbt Lineage Graph](dbt_projects/job_pipeline_dbt/dbt_Lineage_Graph.jpeg)
 
 ### **Generating Documentation Locally**
 You can explore the full interactive documentation and lineage graph locally by running:
