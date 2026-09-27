@@ -8,8 +8,8 @@ This directory contains the final exported Mart tables (Star Schema) generated f
 
 ### 1. Fact Job Skills (`fct_job_skills.csv`)
 * **Description:** Fact table mapping technical job postings to their extracted skills, linking various dimensions.
-* **Row Count:** 6,833 rows
-* **Generated At:** 2026-09-23
+* **Row Count:** 7,883 rows
+* **Generated At:** 2026-09-27
 * **Columns:**
   * `JOB_POSTING_KEY` (VARCHAR(32)) - Foreign key to job postings.
   * `SKILL_KEY` (VARCHAR(32)) - Foreign key to skills dimension.
@@ -22,8 +22,8 @@ This directory contains the final exported Mart tables (Star Schema) generated f
 
 ### 2. Fact Job Postings (`fct_job_postings.csv`)
 * **Description:** Fact table containing core information and metrics for each unique job posting.
-* **Row Count:** 1,196 rows
-* **Generated At:** 2026-09-23
+* **Row Count:** 1,331 rows
+* **Generated At:** 2026-09-27
 * **Columns:**
   * `JOB_POSTING_KEY` (VARCHAR(32)) - Primary key / unique identifier for the job posting.
   * `COMPANY_KEY` (VARCHAR(32)) - Foreign key to company.
@@ -40,8 +40,8 @@ This directory contains the final exported Mart tables (Star Schema) generated f
 
 ### 3. Dimension Skill (`dim_skill.csv`)
 * **Description:** Dimension table containing unique technical skills extracted from job descriptions.
-* **Row Count:** 685 rows
-* **Generated At:** 2026-09-23
+* **Row Count:** 723 rows
+* **Generated At:** 2026-09-27
 * **Columns:**
   * `SKILL_KEY` (VARCHAR(32)) - Primary key.
   * `SKILL_NAME` (VARCHAR) - Name of the technical skill (e.g., Python, SQL, Snowflake).
@@ -51,7 +51,7 @@ This directory contains the final exported Mart tables (Star Schema) generated f
 ### 4. Dimension Location (`dim_location.csv`)
 * **Description:** Dimension table for geographic locations of job opportunities.
 * **Row Count:** 15 rows
-* **Generated At:** 2026-09-23
+* **Generated At:** 2026-09-27
 * **Columns:**
   * `LOCATION_KEY` (VARCHAR(32)) - Primary key.
   * `CITY` (VARCHAR) - City name.
@@ -62,8 +62,8 @@ This directory contains the final exported Mart tables (Star Schema) generated f
 
 ### 5. Dimension Job Attributes (`dim_job_attributes.csv`)
 * **Description:** Dimension table detailing employment types, education requirements, seniority, and categories.
-* **Row Count:** 75 rows
-* **Generated At:** 2026-09-23
+* **Row Count:** 78 rows
+* **Generated At:** 2026-09-27
 * **Columns:**
   * `JOB_ATTRIBUTES_KEY` (VARCHAR(32)) - Primary key.
   * `EMPLOYMENT_TYPE` (VARCHAR) - Type of employment (e.g., Full-time).
@@ -93,8 +93,8 @@ This directory contains the final exported Mart tables (Star Schema) generated f
 
 ### 7. Dimension Company (`dim_company.csv`)
 * **Description:** Dimension table containing employing organizations and companies.
-* **Row Count:** 650 rows
-* **Generated At:** 2026-09-23
+* **Row Count:** 707 rows
+* **Generated At:** 2026-09-27
 * **Columns:**
   * `COMPANY_KEY` (VARCHAR(32)) - Primary key.
   * `COMPANY_NAME` (VARCHAR) - Name of the hiring company.
