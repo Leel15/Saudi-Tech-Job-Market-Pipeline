@@ -105,7 +105,7 @@ dbt docs serve
 
 To visualize the modeled Saudi tech job market data, an interactive Power BI dashboard was built connecting directly to our final Star Schema marts. 
 
-👉 **[Explore Live Interactive Power BI Dashboard Here](https://app.powerbi.com/view?r=eyJrIjoiYmVkOThiMTMtMDUzYS00OTY0LTg3OGUtYmJkYmU4M2UzMDU4IiwidCI6ImMyYjA0ZGE2LTg0ODctNDFjYy04ODAzLTkwMzIxMDQ4YTc3MiIsImMiOjl9)**
+👉 **[Explore Live Interactive Power BI Dashboard Here](https://app.powerbi.com/view?r=eyJrIjoiMTdiNGNiMDctMTU4MS00NDJlLTk4NjYtYWJhMWI5MzA5MzY1IiwidCI6ImMyYjA0ZGE2LTg0ODctNDFjYy04ODAzLTkwMzIxMDQ4YTc3MiIsImMiOjl9)**
 
 ![Power BI Dashboard Preview](assets/dashboard_preview.png)
 
