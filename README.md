@@ -7,7 +7,7 @@ A modular, scalable, and collaborative data pipeline designed to collect, aggreg
 ## 🏗️ Directory Structure
 
 ```
-Job-Data-Pipeline/
+Saudi-Tech-Job-Market-Pipeline/
 ├── Ingestion/                         <-- Scraper scripts and API fetchers for raw job boards
 │   ├── Tanqeeb.py                     
 │   ├── freehire.py                    
@@ -123,7 +123,7 @@ As per our pipeline handover protocol, structured CSV exports of the final Mart 
 Clone the project repository to your local machine:
 
 ```bash
-git clone https://github.com/Leel15/Job-Data-Pipeline.git
+git clone https://github.com/Leel15/Saudi-Tech-Job-Market-Pipeline.git
 cd Job-Data-Pipeline
 ```
 
@@ -137,8 +137,7 @@ pip install -r requirements.txt
 
 ### **3. Configure Environment Variables**
 
-Create a file named `.env` in the root project directory (`Job-Data-Pipeline/`), Add your private API keys 
-
+Create a file named `.env` in the root project directory (`Saudi-Tech-Job-Market-Pipeline/`), Add your private API keys 
 
 ---
 
@@ -164,3 +163,26 @@ dbt test
 - **Never commit `.env`** — it contains sensitive API keys
 - **Pull before pushing** to avoid merge conflicts
 - **Keep scrapers modular** for easy maintenance and scaling
+
+---
+## Known Issues
+
+- External APIs may have rate limits, quotas, or temporary availability issues.
+- Scraped websites may change their page structure, which can affect the scraper.
+- Job postings from different sources may contain duplicate or near-duplicate records.
+- Running the full pipeline requires valid API keys and access to the configured Snowflake and Azure resources.
+- Dashboard data freshness depends on the latest successful pipeline run.
+
+---
+
+## Team Members
+
+*Ghala Alsalem* – Ghalamiyy@gmail.com
+
+*Mohammed Alharbi* – mohammed.y.alhrbi@gmail.com
+
+*Muradi Almutairi* – moradi.khaled.zmoa20115@gmail.com
+
+*Lamia Alsuhibani* – lamiaalsuhibani@gmail.com
+
+© 2026 Job Data Pipeline
