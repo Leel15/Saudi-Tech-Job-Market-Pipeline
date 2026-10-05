@@ -8,20 +8,22 @@ A modular, scalable, and collaborative data pipeline designed to collect, aggreg
 
 ```
 Saudi-Tech-Job-Market-Pipeline/
-├── Ingestion/                         <-- Scraper scripts and API fetchers for raw job boards
-│   ├── Tanqeeb.py                     
-│   ├── freehire.py                    
-│   ├── jooble_api.py                  
-│   └── jsearch.py                     
-│   └── dbt_projects/
-│       └── job_pipeline_dbt/          <-- Core dbt project (models, staging, marts, and schema tests)
-├── data/                              <-- Medallion architecture storage layers (Bronze, Silver, Gold)
-│   ├── final_datasets/                         <-- Gold layer for analytics-ready datasets, aggregates & metrics
-│   ├── STAGING/                       <-- Silver layer for cleaned, deduplicated & standardized files
-│   └── RAW/                           <-- Bronze layer for raw, untransformed scraper and API dumps
-├── .env.example                       <-- Template file outlining required environment variables
-├── .gitignore                         
-└── README.md                          <-- Project documentation and setup guide                        
+├── Ingestion/                        <-- Scraper scripts and API fetchers for raw job boards
+│   ├── Tanqeeb.py                    
+│   ├── freehire.py                   
+│   ├── jooble_api.py                 
+│   └── jsearch.py                    
+├── transformation/                   <-- Transformation scripts and data processing logic
+├── assets/                           <-- Project assets, diagrams, and images
+├── data/                             
+│   ├── final_datasets/               <-- Gold layer for analytics-ready datasets, aggregates & metrics
+│   └── RAW/                          <-- Bronze layer for raw, untransformed scraper and API dumps
+├── dbt_projects/                     <-- Core dbt projects (models, staging, marts, and schema tests)
+├── orchestrator/                     <-- Pipeline orchestration and workflow management
+├── .env.example                      <-- Template file outlining required environment variables
+├── .gitignore                        
+├── README.md                         <-- Project documentation and setup guide         
+└── requirements.txt                  <-- Python dependencies and package requirements                      
 ```
 
 ---
